@@ -9,11 +9,10 @@ import org.joget.apps.datalist.model.DataListColumnFormatDefault;
 import java.time.LocalDate;
 import java.time.Period;
 import org.joget.apps.datalist.service.DataListService;
-import org.joget.commons.util.LogUtil;
 
-public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault{
+public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
-   private final static String MESSAGE_PATH = "messages/TimeAgoDatalistFormatter";
+    private final static String MESSAGE_PATH = "messages/TimeAgoDatalistFormatter";
 
     public String getName() {
         return "Time Ago Datalist Formatter";
@@ -24,103 +23,118 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault{
     }
 
     public String getDescription() {
-        //support i18n
+        // support i18n
         return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.pluginDesc", getClassName(), MESSAGE_PATH);
+    }
+
+    public String getYear() {
+        // support i18n
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.year(s)", getClassName(), MESSAGE_PATH);
+    }
+
+    public String getMonth() {
+        // support i18n
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.month(s)", getClassName(), MESSAGE_PATH);
+    }
+
+    public String getDay() {
+        // support i18n
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.day(s)", getClassName(), MESSAGE_PATH);
     }
 
     @Override
     public String format(DataList dataList, DataListColumn column, Object row, Object value) {
-        
+
         AppDefinition appDef = AppUtil.getCurrentAppDefinition();
         String result = (String) value;
-        String duration = getPropertyString("duration");
-        
-        try {
-            Period dateDiff;
-        
-            if (duration.equals("today")) {
-                if(result.isEmpty()){
-                    return result;
-                }
-                LocalDate date = LocalDate.parse(result); //Date
-                LocalDate currentDate = LocalDate.now(); //Current Date
 
-                //Duration From Column Date To Today
+        String duration = getPropertyString("duration");
+        Period dateDiff;
+
+        if (duration.equals("today")) {
+
+            LocalDate date = LocalDate.parse(result); // Date
+            LocalDate currentDate = LocalDate.now(); // Current Date
+
+            // Duration From Column Date To Today
+            try {
+
                 dateDiff = Period.between(currentDate, date);
 
                 if (Math.abs(dateDiff.getYears()) > 0) {
-                    return Math.abs(dateDiff.getYears()) + " year(s) " + Math.abs(dateDiff.getMonths()) + 
-                            " month(s) " + Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getYears()) + getYear() + Math.abs(dateDiff.getMonths()) +
+                            getMonth() + Math.abs(dateDiff.getDays()) + getDay();
                 } else if (Math.abs(dateDiff.getMonths()) > 0) {
-                    return Math.abs(dateDiff.getMonths()) + " month(s) " + Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getMonths()) + getMonth() + Math.abs(dateDiff.getDays()) + getDay();
                 } else {
-                    return Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getDays()) + getDay();
                 }
 
-            } else if (duration.equals("anotherDate")) {
-                if(result.isEmpty()){
-                    return result;
-                }
-                LocalDate date = LocalDate.parse(result); //Date
+            } catch (Exception e) {
+               LogUtil.error("org.sample.TimeAgoDatalistFormatter", e, "Error!!");
+            }
 
-                String targetDate = getPropertyString("targetDate");
-                String anotherDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetDate);
-                if(anotherDateField.isEmpty()){
-                    return result;
-                }
-                LocalDate anotherDate = LocalDate.parse(anotherDateField); //Another Date
+        } else if (duration.equals("anotherDate")) {
 
-                //From Column Date To Another Date
+            LocalDate date = LocalDate.parse(result); // Date
+
+            String targetDate = getPropertyString("targetDate");
+            String anotherDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetDate);
+            LocalDate anotherDate = LocalDate.parse(anotherDateField); // Another Date
+
+            // From Column Date To Another Date
+            try {
+
                 dateDiff = Period.between(anotherDate, date);
 
                 if (Math.abs(dateDiff.getYears()) > 0) {
-                    return Math.abs(dateDiff.getYears()) + " year(s) " + Math.abs(dateDiff.getMonths()) + 
-                            " month(s) " + Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getYears()) + getYear() + Math.abs(dateDiff.getMonths()) +
+                            getMonth() + Math.abs(dateDiff.getDays()) + getDay();
                 } else if (Math.abs(dateDiff.getMonths()) > 0) {
-                    return Math.abs(dateDiff.getMonths()) + " month(s) " + Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getMonths()) + getMonth() + Math.abs(dateDiff.getDays()) + getDay();
                 } else {
-                    return Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getDays()) + getDay();
                 }
 
-            } else if (duration.equals("twoDates")) {
+            } catch (Exception e) {
+               LogUtil.error("org.sample.TimeAgoDatalistFormatter", e, "Error!!");
+            }
 
-                String targetFromDate = getPropertyString("fromDate");
-                String fromDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetFromDate);
-                if(fromDateField.isEmpty()){
-                    return result;
-                }
-                LocalDate fromDate = LocalDate.parse(fromDateField); //From Date
+        } else if (duration.equals("twoDates")) {
 
-                String targetToDate = getPropertyString("toDate");
-                String toDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetToDate);
-                if(toDateField.isEmpty()){
-                    return result;
-                }
-                LocalDate toDate = LocalDate.parse(toDateField); //To Date
+            String targetFromDate = getPropertyString("fromDate");
+            String fromDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetFromDate);
+            LocalDate fromDate = LocalDate.parse(fromDateField); // From Date
 
-                //Duration Between Two Dates
+            String targetToDate = getPropertyString("toDate");
+            String toDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetToDate);
+            LocalDate toDate = LocalDate.parse(toDateField); // To Date
+
+            // Duration Between Two Dates
+            try {
+
                 dateDiff = Period.between(fromDate, toDate);
 
                 if (Math.abs(dateDiff.getYears()) > 0) {
-                    return Math.abs(dateDiff.getYears()) + " year(s) " + Math.abs(dateDiff.getMonths()) + 
-                            " month(s) " + Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getYears()) + getYear() + Math.abs(dateDiff.getMonths()) +
+                            getMonth() + Math.abs(dateDiff.getDays()) + getDay();
                 } else if (Math.abs(dateDiff.getMonths()) > 0) {
-                    return Math.abs(dateDiff.getMonths()) + " month(s) " + Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getMonths()) + getMonth() + Math.abs(dateDiff.getDays()) + getDay();
                 } else {
-                    return Math.abs(dateDiff.getDays()) + " day(s)";
+                    return Math.abs(dateDiff.getDays()) + getDay();
                 }
-                
+
+            } catch (Exception e) {
+               LogUtil.error(TimeAgoDatalistFormatter.class.getName(), e, "Not able to compute duration");
             }
-        } catch (Exception e) {
-            LogUtil.error(TimeAgoDatalistFormatter.class.getName(), e, "Not able to compute duration");
+
         }
-        
+
         return result;
     }
-    
 
     public String getLabel() {
-        //support i18n
+        // support i18n
         return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.pluginLabel", getClassName(), MESSAGE_PATH);
     }
 
