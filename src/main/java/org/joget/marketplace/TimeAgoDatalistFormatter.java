@@ -9,6 +9,7 @@ import org.joget.apps.datalist.model.DataListColumnFormatDefault;
 import java.time.LocalDate;
 import java.time.Period;
 import org.joget.apps.datalist.service.DataListService;
+import org.joget.commons.util.LogUtil;
 
 public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
@@ -52,8 +53,10 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
         Period dateDiff;
 
         if (duration.equals("today")) {
-
+            
+            result = result.substring(0, 10); // Extract Date from non-ISO format
             LocalDate date = LocalDate.parse(result); // Date
+            
             LocalDate currentDate = LocalDate.now(); // Current Date
 
             // Duration From Column Date To Today
@@ -76,16 +79,19 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
         } else if (duration.equals("anotherDate")) {
 
+            result = result.substring(0, 10); // Extract Date from non-ISO format
             LocalDate date = LocalDate.parse(result); // Date
 
             String targetDate = getPropertyString("targetDate");
             String anotherDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetDate);
+            
+            anotherDateField = anotherDateField.substring(0, 10); // Extract Date from non-ISO format
             LocalDate anotherDate = LocalDate.parse(anotherDateField); // Another Date
 
             // From Column Date To Another Date
             try {
 
-                dateDiff = Period.between(anotherDate, date);
+                dateDiff = Period.between(date, anotherDate);
 
                 if (Math.abs(dateDiff.getYears()) > 0) {
                     return Math.abs(dateDiff.getYears()) + getYear() + Math.abs(dateDiff.getMonths()) +
@@ -104,10 +110,14 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
             String targetFromDate = getPropertyString("fromDate");
             String fromDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetFromDate);
+            
+            fromDateField = fromDateField.substring(0, 10); // Extract Date from non-ISO format
             LocalDate fromDate = LocalDate.parse(fromDateField); // From Date
 
             String targetToDate = getPropertyString("toDate");
             String toDateField = (String) DataListService.evaluateColumnValueFromRow(row, targetToDate);
+            
+            toDateField = toDateField.substring(0, 10); // Extract Date from non-ISO format
             LocalDate toDate = LocalDate.parse(toDateField); // To Date
 
             // Duration Between Two Dates
