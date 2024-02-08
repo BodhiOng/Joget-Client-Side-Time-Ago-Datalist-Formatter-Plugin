@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1706774937129
+Bnd-LastModified: 1707369765175
 Build-Jdk-Spec: 11
 Bundle-Activator: org.joget.marketplace.Activator
 Bundle-ManifestVersion: 2
@@ -12,8 +12,8 @@ Embed-Dependency: *;scope=compile|runtime;inline=false
 Embed-Directory: dependency
 Embed-StripGroup: true
 Embed-Transitive: true
-Export-Package: org.joget.marketplace;uses:="org.joget.apps.datalist.mod
- el,org.osgi.framework";version="7.0.0"
+Export-Package: org.joget.marketplace;version="7.0.0";uses:="org.joget.a
+ pps.datalist.model,org.osgi.framework"
 Import-Package: org.joget.report.dao,org.joget.report.model,org.joget.re
  port.service,org.joget.commons.util,org.joget.plugin.base,org.joget.plu
  gin.property.model,org.joget.plugin.property.service,org.joget.director
