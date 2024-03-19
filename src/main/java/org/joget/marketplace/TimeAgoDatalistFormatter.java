@@ -58,7 +58,15 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
     public String getMinute() {
         // support i18n
         return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.minute(s)", getClassName(), MESSAGE_PATH) + " ";
-    }    
+    }  
+    
+    public String getMixedInputErrorMsg() {
+        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.mixedInputErrorMsg", getClassName(), MESSAGE_PATH);
+    }
+
+    public String getTryDefaultFormatErrorMsg() {
+        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.tryDefaultFormatErrorMsg", getClassName(), MESSAGE_PATH);
+    } 
     
     public String getLabel() {
         // support i18n
@@ -75,7 +83,7 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
     // Check different Date Formats
     public String checkDateFormat(String date) {
-
+        
         // Store different Date Formats
         String[] dateFormats = { "yyyy-MM-dd", "yyyy-MM-dd hh:mm a", "MMMMMMMMM dd, yyyy" };
         
@@ -89,8 +97,8 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
             sdf.setLenient(false); // Set a strict format checking
             SimpleDateFormat finalDateFormat = new SimpleDateFormat("yyyy-MM-dd"); // Format date to yyyy-MM-dd format
 
-            try { // If can parse, the input format is the same as the current dateFormat
-
+            try { // If can parse, the input format is the same as the current 
+                
                 // Break the loop once found matching dateFormat
                 Date unformattedDate = sdf.parse(date);
                 formattedDate = finalDateFormat.format(unformattedDate);
@@ -104,26 +112,44 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
         return formattedDate;
     }
     
+    // Split the time and reform into "hh:mm" format
+    public String splitTime(String time) {
+        
+        // Split time into hours and minutes
+        String[] hour_minute = time.split(":");
+        String hour = hour_minute[0];
+        
+        if (time.toUpperCase().contains("AM") || time.toUpperCase().contains("PM")) {
+            return "";
+            
+        } else {
+            String[] minute_period = hour_minute[1].split(" ");
+            String minute = minute_period[0];
+            time = hour + ":" + minute;
+        }
+        return time;
+    }
+    
     // Check different Time Formats
     public String checkTimeFormat(String time) {
         
         // Store different Time Formats
-        String[] timeFormats = { "hh:mm a", "hh:mma", "h:mm a", "h:mma" };
+        String[] timeFormats = { "hh:mm a", "hh:mma", "h:mm a", "h:mma"};
         
         // Store formatted time
         String formattedTime = "";
-        
+
         // Loop through different Time Formats to find which matches the input time format
         for (String timeFormat : timeFormats) {
-                
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(timeFormat); // Take in the current timeFormat to be checked
 
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(timeFormat); // Take in the current timeFormat to be checked
+            
             try { // If can parse, the input format is the same as the current timeFormat
 
                 // Break the loop once found matching timeFormat
-                LocalTime unformattedDate = LocalTime.parse(time.toUpperCase(), dtf);
+                LocalTime unformattedTime = LocalTime.parse(time.toUpperCase(), dtf);
                 DateTimeFormatter finalTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
-                formattedTime = unformattedDate.format(finalTimeFormat);
+                formattedTime = unformattedTime.format(finalTimeFormat);
                 break;
 
             } catch (DateTimeParseException e) {
@@ -135,14 +161,13 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
     }
     
     // Check if input is a date or time
-    public String checkDateOrTime(String input1, String input2 ) {
+    public String checkDateOrTime(String input1, String input2) {
         
         String diff = "";
-        
+
         if (!"".equals(checkDateFormat(input1)) && !"".equals(checkDateFormat(input2))) {
             
             // If parsing succeeded in checkDateFormat(), the input is a date
-
             String formattedColumnDate = checkDateFormat(input1); // Format date to yyyy-MM-dd format
             String formattedTargetDate = checkDateFormat(input2); // Format date to yyyy-MM-dd format
 
@@ -154,13 +179,11 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
             try {
                 diff = getDateDiff(date1, date2);
             } catch (Exception e) {
-               LogUtil.error("org.sample.TimeAgoDatalistFormatter", e, "Error!!");
             }
             
         } else if (!"".equals(checkTimeFormat(input1)) && !"".equals(checkTimeFormat(input2))) {
-            
+                      
             // If parsing succeeded in checkTimeFormat(), the input is a time
-
             String formattedColumnTime = checkTimeFormat(input1); // Format date to hh:mm a format
             String formattedTargetTime = checkTimeFormat(input2); // Format date to hh:mm a format
 
@@ -173,7 +196,6 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
             try {
                 diff = getTimeDiff(time1, time2);
             } catch (Exception e) {
-               LogUtil.error("org.sample.TimeAgoDatalistFormatter", e, "Error!!");
             }
         }
         return diff;
@@ -220,43 +242,75 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
         
         if (duration.equals("today")) {
             
-            // Obtain input Column Date
-            String columnDateStr = result;
-            String formattedColumnDate = checkDateFormat(columnDateStr); // Format date to yyyy-MM-dd format
-
-            // Parse
-            LocalDate columnDate = LocalDate.parse(formattedColumnDate);
-            LocalDate currentDate = LocalDate.now(); // Current Date      
-
-            // Duration From Column Date To Today
-            try {
-                return getDateDiff(columnDate, currentDate); // Get date difference
-            } catch (Exception e) {
-               LogUtil.error("org.sample.TimeAgoDatalistFormatter", e, "Error!!");
+            // Get input Column Date and Today Date
+            String columnStr = result;
+            String todayStr = LocalDate.now().toString();
+            
+            // Outputs
+            if (!"".equals(splitTime(columnStr))) {
+                System.out.println(getTryDefaultFormatErrorMsg() + columnStr);
+                return columnStr;
+                
+            } else if (!"".equals(checkDateOrTime(columnStr, todayStr))) {
+                return checkDateOrTime(columnStr, todayStr);
+                
+            } else {
+                System.out.println(getMixedInputErrorMsg() + columnStr + ", " + todayStr);
+                return columnStr;
             }
 
         } else if (duration.equals("anotherDate")) {
             
-            // Obtain input Column Date
+            // Get input Column Date
             String columnStr = result;
 
-            // Obtain input Target Date
+            // Get input Target Date
             String targetStr = getPropertyString("targetDate");
             targetStr = (String) DataListService.evaluateColumnValueFromRow(row, targetStr);
             
-            return checkDateOrTime(columnStr, targetStr); // Check if input is a date or time
+            // Outputs
+            if (!"".equals(splitTime(columnStr))) {
+                System.out.println(getTryDefaultFormatErrorMsg() + columnStr);
+                return columnStr;
+                
+            } else if (!"".equals(splitTime(targetStr))) {
+                System.out.println(getTryDefaultFormatErrorMsg() + targetStr);
+                return columnStr;
+                
+            } else if (!"".equals(checkDateOrTime(columnStr, targetStr))) {
+                return checkDateOrTime(columnStr, targetStr);
+                
+            } else {
+                System.out.println(getMixedInputErrorMsg() + columnStr + ", " + targetStr);
+                return columnStr;
+            }
 
         } else if (duration.equals("twoDates")) {
             
-            // Obtain input From Date
+            // Get input From Date
             String fromStr = getPropertyString("fromDate");
             fromStr = (String) DataListService.evaluateColumnValueFromRow(row, fromStr);
             
-            // Obtain input To Date
+            // Get input To Date
             String toStr = getPropertyString("toDate");
             toStr = (String) DataListService.evaluateColumnValueFromRow(row, toStr);
             
-            return checkDateOrTime(fromStr, toStr); // Check if input is a date or time
+            // Outputs
+            if (!"".equals(splitTime(fromStr))) {
+                System.out.println(getTryDefaultFormatErrorMsg() + fromStr);
+                return fromStr + "\n" + toStr;
+                
+            } else if (!"".equals(splitTime(toStr))) {
+                System.out.println(getTryDefaultFormatErrorMsg() + toStr);
+                return fromStr + "\n" + toStr;
+                
+            } else if (!"".equals(checkDateOrTime(fromStr, toStr))) {
+                return checkDateOrTime(fromStr, toStr);
+
+            } else {
+                System.out.println(getMixedInputErrorMsg() + fromStr + ", " + toStr);
+                return fromStr + "\n" + toStr;
+            }
         }
         return result;
     }
