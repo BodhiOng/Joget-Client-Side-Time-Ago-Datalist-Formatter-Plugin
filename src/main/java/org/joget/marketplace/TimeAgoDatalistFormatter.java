@@ -27,7 +27,7 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
     }
 
     public String getVersion() {
-        return "7.0.0";
+        return "7.0.1";
     }
 
     public String getDescription() {
@@ -149,7 +149,7 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
         
         // Split time into hours and minutes
         String[] hour_minute = time.split(":");
-        String hour = hour_minute[0];
+        String hour = String.format("%02d", Integer.parseInt(hour_minute[0]));
 
         if (hour_minute[1].toUpperCase().contains("AM") || hour_minute[1].toUpperCase().contains("PM")) {
             
@@ -174,7 +174,7 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
         String time = "";
         
         // Check validity
-        if (!"".equals(checkDateFormat(formattedTime))) {
+        if ("".equals(checkTimeFormat(formattedTime))) {
             time = "";
             
         } else {
@@ -296,7 +296,7 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
                 return checkDateOrTime(columnStr, todayStr);
 
             } else if ("invalidTimeInputs".equals(checkDateOrTime(columnStr, todayStr))) {
-                System.out.println(getTryDefaultFormatErrorMsg() + columnStr + ", " + todayStr);
+                LogUtil.info(getClass().getName(), getTryDefaultFormatErrorMsg()  + columnStr + ", " + todayStr);
                 return columnStr;
             }
 
@@ -314,7 +314,7 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
                 return checkDateOrTime(columnStr, targetStr);
 
             } else if ("invalidTimeInputs".equals(checkDateOrTime(columnStr, targetStr))) {
-                System.out.println(getTryDefaultFormatErrorMsg() + columnStr + ", " + targetStr);
+                LogUtil.info(getClass().getName(), getTryDefaultFormatErrorMsg()  + columnStr + ", " + targetStr);
                 return columnStr;
             }
 
@@ -333,8 +333,8 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
                 return checkDateOrTime(fromStr, toStr);
 
             } else if ("invalidTimeInputs".equals(checkDateOrTime(fromStr, toStr))) {
-                System.out.println(getTryDefaultFormatErrorMsg() + fromStr + ", " + toStr);
-                return fromStr + "\n" + toStr;
+                LogUtil.info(getClass().getName(), getTryDefaultFormatErrorMsg()  + fromStr + ", " + toStr);
+                return result;
             }
         }
         return result;
