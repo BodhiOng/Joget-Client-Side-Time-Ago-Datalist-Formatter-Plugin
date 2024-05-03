@@ -1,0 +1,50 @@
+[{
+    "title" : "@@org.joget.marketplace.TimeAgoDatalistFormatter.config@@",
+    "properties" : [
+        {
+            "name":"duration",
+            "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.duration@@",
+            "type":"selectbox",
+            "required":"True",
+            "options":[
+                {
+                   "value":"today",
+                   "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.today@@"
+                },
+                {
+                   "value":"anotherDate",
+                   "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.anotherDate@@"
+                },
+                {
+                   "value":"twoDates",
+                   "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.twoDates@@"
+                }]
+        },
+        {
+            "name" : "targetDate",
+            "label" : "@@org.joget.marketplace.TimeAgoDatalistFormatter.targetDate@@",
+            "type" : "selectbox",
+            "options_callback" : "DatalistBuilder.getColumnOptions",
+            "required": "true",
+            "control_field": "duration",
+            "control_value": "anotherDate"
+        },
+        {
+            "name" : "fromDate",
+            "label" : "@@org.joget.marketplace.TimeAgoDatalistFormatter.fromDate@@",
+            "type" : "selectbox",
+            "options_callback" : "DatalistBuilder.getColumnOptions",
+            "required": "true",
+            "control_field": "duration",
+            "control_value": "twoDates"
+        },
+        {
+            "name" : "toDate",
+            "label" : "@@org.joget.marketplace.TimeAgoDatalistFormatter.toDate@@",
+            "type" : "selectbox",
+            "options_callback" : "DatalistBuilder.getColumnOptions",
+            "required": "true",
+            "control_field": "duration",
+            "control_value": "twoDates"
+        }]
+}]
