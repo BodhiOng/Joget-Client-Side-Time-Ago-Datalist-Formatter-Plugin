@@ -46,5 +46,46 @@
             "required": "true",
             "control_field": "duration",
             "control_value": "twoDates"
+        },
+        {
+            "name":"dateOutputFormat",
+            "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.dateOutputFormat@@",
+            "type":"selectbox",
+            "options":[
+                {
+                    "value":"",
+                    "label":""
+                },
+                {
+                   "value":"year",
+                   "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.year(s)@@"
+                },
+                {
+                   "value":"month",
+                   "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.month(s)@@"
+                },
+                {
+                   "value":"day",
+                   "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.day(s)@@"
+                },
+                {
+                    "value":"hour",
+                    "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.hour(s)@@"
+                },
+                {
+                    "value":"minute",
+                    "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.minute(s)@@"
+                }]
+        },
+        {
+            "name": "inclDateOutputFormat",
+            "label": "@@org.joget.marketplace.TimeAgoDatalistFormatter.inclDateOutputFormat@@",
+            "type": "checkbox",
+            "options": [
+                {
+                    "value": "true",
+                    "label": ""
+                }
+            ]
         }]
 }]
