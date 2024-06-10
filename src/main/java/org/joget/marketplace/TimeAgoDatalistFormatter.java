@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +22,7 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 
 public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
@@ -32,7 +34,7 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
     }
 
     public String getVersion() {
-        return "7.0.2";
+        return "7.0.3";
     }
 
     public String getDescription() {
@@ -84,10 +86,19 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
     // Check different Date Formats
     public String checkDateFormat(String date) {
-        
+
         // Store different Date Formats
-        String[] dateFormats = { "yyyy-MM-dd", "MMMMMMMMM dd, yyyy" };
-        
+        String[] dateFormats = { "yyyy-MM-dd", "MMMMMMMMM dd, yyyy", "dd-MM-yyyy" };
+        String additionalFormats = getPropertyString("dateFormat");
+
+        if (!additionalFormats.equals("")) {
+            ArrayList<String> timeFormatsList = new ArrayList<>(Arrays.asList(dateFormats));
+            String[] additionalFormatsArray = additionalFormats.split("\\s*,\\s*");
+            ArrayList<String> additionalFormatsList = new ArrayList<>(Arrays.asList(additionalFormatsArray));
+            timeFormatsList.addAll(additionalFormatsList);
+            dateFormats = timeFormatsList.toArray(new String[0]);
+        }
+
         // Store formatted date
         String formattedDate = "";
                    
@@ -115,9 +126,18 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
     
     // Check different Time Formats
     public String checkTimeFormat(String time) {
-        
-        // Store different Time Formats
+
+         // Store different Time Formats
         String[] timeFormats = { "hh:mm a", "hh:mma", "h:mm a", "h:mma" };
+        String additionalFormats = getPropertyString("timeFormat");
+
+        if(!additionalFormats.equals("")){
+            ArrayList<String> timeFormatsList = new ArrayList<>(Arrays.asList(timeFormats));
+            String[] additionalFormatsArray = additionalFormats.split("\\s*,\\s*");
+            ArrayList<String> additionalFormatsList = new ArrayList<>(Arrays.asList(additionalFormatsArray));
+            timeFormatsList.addAll(additionalFormatsList);
+            timeFormats = timeFormatsList.toArray(new String[0]);
+        }
 
         // Store formatted time
         String formattedTime = "";
@@ -152,15 +172,28 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
      // Check different DateTime Formats
      public String checkDateTimeFormat(String dateTime) {
 
-        String[] dateTimeFormats = { "yyyy-MM-dd hh:mm a", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH:mma", "yyyy-MM-dd'T'HH:mm:ss.SSSSSS" };
+        String[] dateTimeFormats = { "yyyy-MM-dd hh:mm a", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH:mma", "yyyy-MM-dd'T'HH:mm:ss.SSSSSS", "yyyy-MM-dd'T'HH:mm:ss",  "dd-MM-yyyy hh:mm a", "dd-MM-yyyy hh:mma", "dd-MM-yyyy HH:mma", "dd-MM-yyyy HH:mm"};
+        String additionalFormats = getPropertyString("dateFormat");
+  
+        if (!additionalFormats.equals("")) {
+            ArrayList<String> timeFormatsList = new ArrayList<>(Arrays.asList(dateTimeFormats));
+            String[] additionalFormatsArray = additionalFormats.split("\\s*,\\s*");
+            ArrayList<String> additionalFormatsList = new ArrayList<>(Arrays.asList(additionalFormatsArray));
+            timeFormatsList.addAll(additionalFormatsList);
+            dateTimeFormats = timeFormatsList.toArray(new String[0]);
+        }
+
         LocalDateTime formattedDateTime = null;
         String formattedDate = "";
         String formattedTime = "";
         Boolean validTimeInputs;
         for (String format : dateTimeFormats) {
             try {
+                DateTimeFormatter f = new DateTimeFormatterBuilder().parseCaseInsensitive()
+                .append(DateTimeFormatter.ofPattern(format)).toFormatter();
                 // Attempt to parse the input string using the current format
-                formattedDateTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern(format));
+                formattedDateTime = LocalDateTime.parse(dateTime, f);
+
                 break; // If parsing succeeds, exit the loop
             } catch (DateTimeParseException e) {
                 // Continue to check for other formats if
@@ -361,56 +394,62 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
      // Format final datetime output based on user configuration
      public String formatDateTimeOutput(String time, String dateOutputFormat, String inclDateOutputFormat) {
+        String finalOutput = "";
+        // split multi select box value
+        String[] parts = dateOutputFormat.split(";");
+        
         String regex;
-        
-        switch (dateOutputFormat) {
-            case "year":
-                if(inclDateOutputFormat.equals("true")) {
-                    regex = "\\b(\\d+\\s+year\\(s\\))";
-                } else {
-                    regex = "\\b(\\d+)\\s+year\\(s\\)";
-                }
-                break;
-            case "month":
-                if(inclDateOutputFormat.equals("true")) {
-                    regex = "\\b(\\d+\\s+month\\(s\\))";
-                } else {
-                    regex = "\\b(\\d+)\\s+month\\(s\\)";
-                }
-                break;
-            case "day":
-                if(inclDateOutputFormat.equals("true")) {
-                    regex = "\\b(\\d+\\s+day\\(s\\))";
-                } else {
-                    regex = "\\b(\\d+)\\s+day\\(s\\)";
-                }
-                break;
-            case "hour":
-                if(inclDateOutputFormat.equals("true")) {
-                    regex = "\\b(\\d+\\s+hour\\(s\\))";
-                } else {
-                    regex = "\\b(\\d+)\\s+hour\\(s\\)";
-                }
-                break;
-            case "minute":
-                if(inclDateOutputFormat.equals("true")) {
-                    regex = "\\b(\\d+\\s+minute\\(s\\))";
-                } else {
-                    regex = "\\b(\\d+)\\s+minute\\(s\\)";
-                }
-                break;
-            default:
-                return time; // If desired unit is not recognized, return input as is
+        for (String part : parts) {
+            switch (part) {
+                case "year":
+                    if(inclDateOutputFormat.equals("true")) {
+                        regex = "\\b(\\d+\\s+year\\(s\\))";
+                    } else {
+                        regex = "\\b(\\d+)\\s+year\\(s\\)";
+                    }
+                    break;
+                case "month":
+                    if(inclDateOutputFormat.equals("true")) {
+                        regex = "\\b(\\d+\\s+month\\(s\\))";
+                    } else {
+                        regex = "\\b(\\d+)\\s+month\\(s\\)";
+                    }
+                    break;
+                case "day":
+                    if(inclDateOutputFormat.equals("true")) {
+                        regex = "\\b(\\d+\\s+day\\(s\\))";
+                    } else {
+                        regex = "\\b(\\d+)\\s+day\\(s\\)";
+                    }
+                    break;
+                case "hour":
+                    if(inclDateOutputFormat.equals("true")) {
+                        regex = "\\b(\\d+\\s+hour\\(s\\))";
+                    } else {
+                        regex = "\\b(\\d+)\\s+hour\\(s\\)";
+                    }
+                    break;
+                case "minute":
+                    if(inclDateOutputFormat.equals("true")) {
+                        regex = "\\b(\\d+\\s+minute\\(s\\))";
+                    } else {
+                        regex = "\\b(\\d+)\\s+minute\\(s\\)";
+                    }
+                    break;
+                default:
+                    return time; // If desired unit is not recognized, return input as is
+            }
+
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(time);
+            
+            if (matcher.find()) {
+                finalOutput += matcher.group(1) + " ";
+            } else {
+                finalOutput += ""; // If no match found, return an empty string
+            }
         }
-        
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(time);
-        
-        if (matcher.find()) {
-            return matcher.group(1);
-        } else {
-            return ""; // If no match found, return an empty string
-        }
+        return finalOutput;
     }
     
     @Override

@@ -50,7 +50,7 @@
         {
             "name":"dateOutputFormat",
             "label":"@@org.joget.marketplace.TimeAgoDatalistFormatter.dateOutputFormat@@",
-            "type":"selectbox",
+            "type":"MultiSelect",
             "options":[
                 {
                     "value":"",
@@ -87,5 +87,29 @@
                     "label": ""
                 }
             ]
-        }]
+        },
+        {
+            "label": "@@org.joget.marketplace.TimeAgoDatalistFormatter.dateTimeFormatProcessing@@",
+            "type": "header",
+              "description": "@@org.joget.marketplace.TimeAgoDatalistFormatter.dateTimeFormatProcessing.desc@@"
+        },
+        {
+            "name": "dateTimeFormat",
+            "label": "@@org.joget.marketplace.TimeAgoDatalistFormatter.dateTimeFormat@@",
+            "type": "textfield",
+            "description": "@@org.joget.marketplace.TimeAgoDatalistFormatter.dateTimeFormat.desc@@"
+        },
+        {
+            "name": "dateFormat",
+            "label": "@@org.joget.marketplace.TimeAgoDatalistFormatter.dateFormat@@",
+            "type": "textfield",
+            "description": "@@org.joget.marketplace.TimeAgoDatalistFormatter.dateFormat.desc@@"
+        },
+        {
+            "name": "timeFormat",
+            "label": "@@org.joget.marketplace.TimeAgoDatalistFormatter.timeFormat@@",
+            "type": "textfield",
+            "description": "@@org.joget.marketplace.TimeAgoDatalistFormatter.timeFormat.desc@@"
+        }
+    ]
 }]
