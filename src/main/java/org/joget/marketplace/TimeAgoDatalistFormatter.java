@@ -1,29 +1,13 @@
 package org.joget.marketplace;
 
-import java.text.SimpleDateFormat;
-import org.joget.apps.app.model.AppDefinition;
+import java.util.UUID;
+
 import org.joget.apps.app.service.AppPluginUtil;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.datalist.model.DataList;
 import org.joget.apps.datalist.model.DataListColumn;
 import org.joget.apps.datalist.model.DataListColumnFormatDefault;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.joget.apps.datalist.service.DataListService;
-import org.joget.commons.util.LogUtil;
-import java.text.ParseException;
-import java.time.Duration;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 
 public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
@@ -39,41 +23,49 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
 
     public String getDescription() {
         // support i18n
-        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.pluginDesc", getClassName(), MESSAGE_PATH);
+        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.pluginDesc", getClassName(),
+                MESSAGE_PATH);
     }
 
     public String getYear() {
         // support i18n
-        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.year(s)", getClassName(), MESSAGE_PATH) + " ";
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.year(s)", getClassName(),
+                MESSAGE_PATH) + " ";
     }
 
     public String getMonth() {
         // support i18n
-        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.month(s)", getClassName(), MESSAGE_PATH) + " ";
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.month(s)", getClassName(),
+                MESSAGE_PATH) + " ";
     }
 
     public String getDay() {
         // support i18n
-        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.day(s)", getClassName(), MESSAGE_PATH) + " ";
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.day(s)", getClassName(),
+                MESSAGE_PATH) + " ";
     }
-    
+
     public String getHour() {
         // support i18n
-        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.hour(s)", getClassName(), MESSAGE_PATH) + " ";
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.hour(s)", getClassName(),
+                MESSAGE_PATH) + " ";
     }
 
     public String getMinute() {
         // support i18n
-        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.minute(s)", getClassName(), MESSAGE_PATH) + " ";
-    }  
-    
+        return " " + AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.minute(s)",
+                getClassName(), MESSAGE_PATH) + " ";
+    }
+
     public String getTryDefaultFormatErrorMsg() {
-        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.tryDefaultFormatErrorMsg", getClassName(), MESSAGE_PATH);
-    } 
-    
+        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.tryDefaultFormatErrorMsg",
+                getClassName(), MESSAGE_PATH);
+    }
+
     public String getLabel() {
         // support i18n
-        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.pluginLabel", getClassName(), MESSAGE_PATH);
+        return AppPluginUtil.getMessage("org.joget.marketplace.TimeAgoDatalistFormatter.pluginLabel", getClassName(),
+                MESSAGE_PATH);
     }
 
     public String getClassName() {
@@ -81,437 +73,297 @@ public class TimeAgoDatalistFormatter extends DataListColumnFormatDefault {
     }
 
     public String getPropertyOptions() {
-        return AppUtil.readPluginResource(getClassName(), "/properties/TimeAgoDatalistFormatter.json", null, true, MESSAGE_PATH);
+        return AppUtil.readPluginResource(getClassName(), "/properties/TimeAgoDatalistFormatter.json", null, true,
+                MESSAGE_PATH);
     }
 
-    // Check different Date Formats
-    public String checkDateFormat(String date) {
-
-        // Store different Date Formats
-        String[] dateFormats = { "yyyy-MM-dd", "MMMMMMMMM dd, yyyy", "dd-MM-yyyy" };
-        String additionalFormats = getPropertyString("dateFormat");
-
-        if (!additionalFormats.equals("")) {
-            ArrayList<String> timeFormatsList = new ArrayList<>(Arrays.asList(dateFormats));
-            String[] additionalFormatsArray = additionalFormats.split("\\s*,\\s*");
-            ArrayList<String> additionalFormatsList = new ArrayList<>(Arrays.asList(additionalFormatsArray));
-            timeFormatsList.addAll(additionalFormatsList);
-            dateFormats = timeFormatsList.toArray(new String[0]);
-        }
-
-        // Store formatted date
-        String formattedDate = "";
-                   
-        // Loop through different Date Formats to find which matches the input date format
-        for (String dateFormat : dateFormats) {
-
-            SimpleDateFormat sdf = new SimpleDateFormat(dateFormat); // Take in the current dateFormat to be checked
-            sdf.setLenient(false); // Set a strict format checking
-            SimpleDateFormat finalDateFormat = new SimpleDateFormat("yyyy-MM-dd"); // Format date to yyyy-MM-dd format
-
-            try { // If can parse, the input format is the same as the current 
-                
-                // Break the loop once found matching dateFormat
-                Date unformattedDate = sdf.parse(date);
-                formattedDate = finalDateFormat.format(unformattedDate);
-                break;
-
-            } catch (ParseException e) {
-                // Continue to check for other formats if
-                // input format does not match current format
-            }
-        }
-        return formattedDate;
-    }
-    
-    // Check different Time Formats
-    public String checkTimeFormat(String time) {
-
-         // Store different Time Formats
-        String[] timeFormats = { "hh:mm a", "hh:mma", "h:mm a", "h:mma" };
-        String additionalFormats = getPropertyString("timeFormat");
-
-        if(!additionalFormats.equals("")){
-            ArrayList<String> timeFormatsList = new ArrayList<>(Arrays.asList(timeFormats));
-            String[] additionalFormatsArray = additionalFormats.split("\\s*,\\s*");
-            ArrayList<String> additionalFormatsList = new ArrayList<>(Arrays.asList(additionalFormatsArray));
-            timeFormatsList.addAll(additionalFormatsList);
-            timeFormats = timeFormatsList.toArray(new String[0]);
-        }
-
-        // Store formatted time
-        String formattedTime = "";
-        
-        if (!"".equals(checkDateFormat(time))) {
-            formattedTime = "";
-            
-        } else {
-
-            // Loop through different Time Formats to find which matches the input time format
-            for (String timeFormat : timeFormats) {
-
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(timeFormat); // Take in the current timeFormat to be checked
-
-                try { // If can parse, the input format is the same as the current timeFormat
-
-                    // Break the loop once found matching timeFormat
-                    LocalTime unformattedTime = LocalTime.parse(time.toUpperCase(), dtf);
-                    DateTimeFormatter finalTimeFormat = DateTimeFormatter.ofPattern("hh:mm a");
-                    formattedTime = unformattedTime.format(finalTimeFormat);
-                    break;
-
-                } catch (DateTimeParseException e) {
-                    // Continue to check for other formats if
-                    // input format does not match current format
-                }
-            }
-        } 
-        return formattedTime;
-    }
-
-     // Check different DateTime Formats
-     public String checkDateTimeFormat(String dateTime) {
-
-        String[] dateTimeFormats = { "yyyy-MM-dd hh:mm a", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH:mma", "yyyy-MM-dd'T'HH:mm:ss.SSSSSS", "yyyy-MM-dd'T'HH:mm:ss",  "dd-MM-yyyy hh:mm a", "dd-MM-yyyy hh:mma", "dd-MM-yyyy HH:mma", "dd-MM-yyyy HH:mm"};
-        String additionalFormats = getPropertyString("dateFormat");
-  
-        if (!additionalFormats.equals("")) {
-            ArrayList<String> timeFormatsList = new ArrayList<>(Arrays.asList(dateTimeFormats));
-            String[] additionalFormatsArray = additionalFormats.split("\\s*,\\s*");
-            ArrayList<String> additionalFormatsList = new ArrayList<>(Arrays.asList(additionalFormatsArray));
-            timeFormatsList.addAll(additionalFormatsList);
-            dateTimeFormats = timeFormatsList.toArray(new String[0]);
-        }
-
-        LocalDateTime formattedDateTime = null;
-        String formattedDate = "";
-        String formattedTime = "";
-        Boolean validTimeInputs;
-        for (String format : dateTimeFormats) {
-            try {
-                DateTimeFormatter f = new DateTimeFormatterBuilder().parseCaseInsensitive()
-                .append(DateTimeFormatter.ofPattern(format)).toFormatter();
-                // Attempt to parse the input string using the current format
-                formattedDateTime = LocalDateTime.parse(dateTime, f);
-
-                break; // If parsing succeeds, exit the loop
-            } catch (DateTimeParseException e) {
-                // Continue to check for other formats if
-                // input format does not match current format
-            }
-        }
-
-        if (formattedDateTime != null) {
-            // Parsing successful, separate date and time components
-            String date = formattedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            String time = formattedDateTime.format(DateTimeFormatter.ofPattern("hh:mma"));
-
-            formattedDate = checkDateFormat(date);
-            validTimeInputs = ("validTimeInputs".equals(checkTimeValidity(time)));
-
-            if (validTimeInputs) {
-                formattedTime = checkTimeFormat(time); // Format date to hh:mm a format
-            }
-        }
-            
-        return formattedDate + "//" + formattedTime;
-    }
-    
-    // Split the time and reform into "hh:mm" format
-    public String splitTime(String time) {
-        
-        // Split time into hours and minutes
-        String[] hour_minute = time.split(":");
-        String hour = String.format("%02d", Integer.parseInt(hour_minute[0]));
-
-        if (hour_minute[1].toUpperCase().contains("AM") || hour_minute[1].toUpperCase().contains("PM")) {
-            
-            if (hour_minute[1].contains(" ")) {
-                String[] minute_indicator = hour_minute[1].split(" ");
-                String minute = minute_indicator[0];
-                time = hour + ":" + minute;
-                
-            } else {
-                String[] minute_indicator = hour_minute[1].split("[aApP]");
-                String minute = minute_indicator[0];
-                time = hour + ":" + minute;
-            }
-            
-        }
-        return time;
-    }
-    
-    // Check Time Validity
-    public String checkTimeValidity(String formattedTime) {
-       
-        String time = "";
-        
-        // Check validity
-        if ("".equals(checkTimeFormat(formattedTime))) {
-            time = "";
-            
-        } else {
-            
-            time = splitTime(formattedTime);
-            
-            // Conditions
-            Boolean is12Hours = LocalTime.parse(time).getHour() >= 0 && LocalTime.parse(time).getHour() <= 12;
-            Boolean is24Hours = LocalTime.parse(time).getHour() > 12 && LocalTime.parse(time).getHour() < 24;
-            Boolean isWithin60Minutes = LocalTime.parse(time).getMinute() >= 0 && LocalTime.parse(time).getMinute() < 60;
-            Boolean hasTimeIndicator = formattedTime.toUpperCase().contains("AM") || formattedTime.toUpperCase().contains("PM");
-            
-            if (is12Hours && hasTimeIndicator)  { // Valid
-
-                if (isWithin60Minutes) { // Valid
-                    time = "validTimeInputs"; // Valid time
-                }
-
-            } else if (is24Hours && !hasTimeIndicator) { // Valid
-
-                if (isWithin60Minutes) { // Valid
-                    time = "validTimeInputs"; // Valid time
-                }
-            }
-        }
-        return time;
-    }
-    
-    // Check if input is a date or time
-    public String checkDateOrTime(String input1, String input2) {
-        
-        String diff = "";
-        
-        // Conditions
-        Boolean equalDateInputs = !"".equals(checkDateFormat(input1)) && !"".equals(checkDateFormat(input2));
-        Boolean validTimeInputs = ("validTimeInputs".equals(checkTimeValidity(input1)) && "validTimeInputs".equals(checkTimeValidity(input2)));
-        Boolean equalDateTimeInputs = !"//".equals(checkDateTimeFormat(input1)) && !"//".equals(checkDateTimeFormat(input2));
-
-        if (equalDateInputs) {
-            
-            // If parsing succeeded in checkDateFormat(), the input is a date
-            String formattedColumnDate = checkDateFormat(input1); // Format date to yyyy-MM-dd format
-            String formattedTargetDate = checkDateFormat(input2); // Format date to yyyy-MM-dd format
-
-            // Parse
-            LocalDate date1 = LocalDate.parse(formattedColumnDate); // First input date
-            LocalDate date2 = LocalDate.parse(formattedTargetDate); // Second input date
-
-            // Find difference between date1 and date2
-            diff = getDateDiff(date1, date2);
-
-            // if is datetime, split the date and append time difference
-            if (equalDateTimeInputs) {
-    
-                String formattedColumnDateTime = checkDateTimeFormat(input1); // get datetime
-                String formattedTargetDateTime = checkDateTimeFormat(input2); // get datetime
-
-                // Split the string into two parts using the delimiter "//"
-                String[] separatedColumnDateTime = formattedColumnDateTime.split("//");
-                String[] separatedTargetDateTime = formattedTargetDateTime.split("//");
-
-                String separatedColumnTime = new String();
-                String separatedTargetTime = new String();
-
-                // Check if the split produced exactly two parts and only get time value
-                if (separatedColumnDateTime.length == 2) {
-                    separatedColumnTime = separatedColumnDateTime[1];
-                }
-                if (separatedTargetDateTime.length == 2) {
-                    separatedTargetTime = separatedTargetDateTime[1];
-                }
-
-                // Parse
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
-                LocalTime time1 = LocalTime.parse(separatedColumnTime, dtf); // First input time
-                LocalTime time2 = LocalTime.parse(separatedTargetTime, dtf); // Second input time
-
-                // Find difference between time1 and time2, if 0 day(s), replace instead of append
-                if(diff.equals("0 day(s) ")){
-                    diff = getTimeDiff(time1, time2);
-                } else{
-                    diff += getTimeDiff(time1, time2);
-                }
-            }
-            
-        } else if (validTimeInputs) {
-            
-            // If parsing succeeded in checkTimeFormat(), the input is a time
-            String formattedColumnTime = checkTimeFormat(input1); // Format date to hh:mm a format
-            String formattedTargetTime = checkTimeFormat(input2); // Format date to hh:mm a format
-
-            // Parse
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
-            LocalTime time1 = LocalTime.parse(formattedColumnTime, dtf); // First input time
-            LocalTime time2 = LocalTime.parse(formattedTargetTime, dtf); // Second input time
-
-            // Find difference between time1 and time2
-            diff = getTimeDiff(time1, time2);
-            
-        } else if (!validTimeInputs) {
-            diff = "invalidTimeInputs";
-            
-        }
-
-         // Format final datetime output based on user configuration
-        String dateOutputFormat = getPropertyString("dateOutputFormat");
-        String inclDateOutputFormat = getPropertyString("inclDateOutputFormat");
-        if (!dateOutputFormat.equals("") && !dateOutputFormat.isEmpty()){
-            diff = formatDateTimeOutput(diff, dateOutputFormat, inclDateOutputFormat);
-        }
-        return diff;
-    }
-    
-    // Calculate difference between date1 and date2
-    public String getDateDiff(LocalDate date1, LocalDate date2) {
-        
-        Period dateDiff = Period.between(date1, date2);
-        String diff;
-        
-        if (Math.abs(dateDiff.getYears()) > 0) {
-            diff = Math.abs(dateDiff.getYears()) + getYear() + Math.abs(dateDiff.getMonths()) +
-                    getMonth() + Math.abs(dateDiff.getDays()) + getDay();
-        } else if (Math.abs(dateDiff.getMonths()) > 0) {
-            diff = Math.abs(dateDiff.getMonths()) + getMonth() + Math.abs(dateDiff.getDays()) + getDay();
-        } else {
-            diff = Math.abs(dateDiff.getDays()) + getDay();
-        }
-        return diff;
-    }
-    
-    // Calculate difference between time1 and time2
-    public String getTimeDiff(LocalTime time1, LocalTime time2) {
-        
-        Duration timeDiff = Duration.between(time1, time2);
-        String diff;
-
-        if (Math.abs(timeDiff.toHours()) > 0) {
-            diff = Math.abs(timeDiff.toHours()) + getHour() + Math.abs(timeDiff.toMinutes() % 60) + getMinute();
-        } else {
-            diff = Math.abs(timeDiff.toMinutes() % 60) + getMinute();
-        }
-        return diff;
-    }
-
-     // Format final datetime output based on user configuration
-     public String formatDateTimeOutput(String time, String dateOutputFormat, String inclDateOutputFormat) {
-        String finalOutput = "";
-        // split multi select box value
-        String[] parts = dateOutputFormat.split(";");
-        
-        String regex;
-        for (String part : parts) {
-            switch (part) {
-                case "year":
-                    if(inclDateOutputFormat.equals("true")) {
-                        regex = "\\b(\\d+\\s+year\\(s\\))";
-                    } else {
-                        regex = "\\b(\\d+)\\s+year\\(s\\)";
-                    }
-                    break;
-                case "month":
-                    if(inclDateOutputFormat.equals("true")) {
-                        regex = "\\b(\\d+\\s+month\\(s\\))";
-                    } else {
-                        regex = "\\b(\\d+)\\s+month\\(s\\)";
-                    }
-                    break;
-                case "day":
-                    if(inclDateOutputFormat.equals("true")) {
-                        regex = "\\b(\\d+\\s+day\\(s\\))";
-                    } else {
-                        regex = "\\b(\\d+)\\s+day\\(s\\)";
-                    }
-                    break;
-                case "hour":
-                    if(inclDateOutputFormat.equals("true")) {
-                        regex = "\\b(\\d+\\s+hour\\(s\\))";
-                    } else {
-                        regex = "\\b(\\d+)\\s+hour\\(s\\)";
-                    }
-                    break;
-                case "minute":
-                    if(inclDateOutputFormat.equals("true")) {
-                        regex = "\\b(\\d+\\s+minute\\(s\\))";
-                    } else {
-                        regex = "\\b(\\d+)\\s+minute\\(s\\)";
-                    }
-                    break;
-                default:
-                    return time; // If desired unit is not recognized, return input as is
-            }
-
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(time);
-            
-            if (matcher.find()) {
-                finalOutput += matcher.group(1) + " ";
-            } else {
-                finalOutput += ""; // If no match found, return an empty string
-            }
-        }
-        return finalOutput;
-    }
-    
     @Override
     public String format(DataList dataList, DataListColumn column, Object row, Object value) {
-
-        AppDefinition appDef = AppUtil.getCurrentAppDefinition();
         String result = (String) value;
-        
         String duration = getPropertyString("duration");
-        
-        if (duration.equals("today")) {
-            
-            // Get input Column Date and Today Date
-            String columnStr = result;
-            String todayStr = LocalDateTime.now().toString();
+        String uniqueId = "timeago_" + UUID.randomUUID().toString().replace("-", "");
+        String dateOutputFormat = getPropertyString("dateOutputFormat");
+        String inclDateOutputFormat = getPropertyString("inclDateOutputFormat");
 
-            // Outputs
-            if (!"invalidTimeInputs".equals(checkDateOrTime(columnStr, todayStr))) {
-                return checkDateOrTime(columnStr, todayStr);
+        StringBuilder script = new StringBuilder();
+        script.append("<span id=\"" + uniqueId + "\" class=\"time-ago-formatter\" data-value=\"" + escapeHtml(result)
+                + "\">");
+        script.append(result); // Default value until JavaScript runs
+        script.append("</span>\n");
 
-            } else if ("invalidTimeInputs".equals(checkDateOrTime(columnStr, todayStr))) {
-                LogUtil.info(getClass().getName(), getTryDefaultFormatErrorMsg()  + columnStr + ", " + todayStr);
-                return columnStr;
-            }
+        script.append("<script>\n");
+        script.append("(function() {\n");
+        script.append("  const element = document.getElementById('" + uniqueId + "');\n");
+        script.append("  const value = element.getAttribute('data-value');\n");
 
-        } else if (duration.equals("anotherDate")) {
-            
-            // Get input Column Date
-            String columnStr = result;
+        // Add the duration type
+        script.append("  const durationType = '" + duration + "';\n");
 
-            // Get input Target Date
+        // Add the date output format preferences
+        script.append("  const dateOutputFormat = '" + dateOutputFormat + "';\n");
+        script.append("  const inclDateOutputFormat = '" + inclDateOutputFormat + "';\n");
+
+        // Add internationalization strings
+        script.append("  const i18n = {\n");
+        script.append("    year: '" + getYear().trim() + "',\n");
+        script.append("    month: '" + getMonth().trim() + "',\n");
+        script.append("    day: '" + getDay().trim() + "',\n");
+        script.append("    hour: '" + getHour().trim() + "',\n");
+        script.append("    minute: '" + getMinute().trim() + "'\n");
+        script.append("  };\n");
+
+        // Add target date for "anotherDate" mode
+        if (duration.equals("anotherDate")) {
             String targetStr = getPropertyString("targetDate");
             targetStr = (String) DataListService.evaluateColumnValueFromRow(row, targetStr);
-                
-            // Outputs
-            if (!"invalidTimeInputs".equals(checkDateOrTime(columnStr, targetStr))) {
-                return checkDateOrTime(columnStr, targetStr);
+            script.append("  const targetDate = '" + escapeHtml(targetStr) + "';\n");
+        }
 
-            } else if ("invalidTimeInputs".equals(checkDateOrTime(columnStr, targetStr))) {
-                LogUtil.info(getClass().getName(), getTryDefaultFormatErrorMsg()  + columnStr + ", " + targetStr);
-                return columnStr;
-            }
-
-        } else if (duration.equals("twoDates")) {
-            
-            // Get input From Date
+        // Add from and to dates for "twoDates" mode
+        if (duration.equals("twoDates")) {
             String fromStr = getPropertyString("fromDate");
             fromStr = (String) DataListService.evaluateColumnValueFromRow(row, fromStr);
-            
-            // Get input To Date
             String toStr = getPropertyString("toDate");
             toStr = (String) DataListService.evaluateColumnValueFromRow(row, toStr);
-            
-            // Outputs
-            if (!"invalidTimeInputs".equals(checkDateOrTime(fromStr, toStr))) {
-                return checkDateOrTime(fromStr, toStr);
-
-            } else if ("invalidTimeInputs".equals(checkDateOrTime(fromStr, toStr))) {
-                LogUtil.info(getClass().getName(), getTryDefaultFormatErrorMsg()  + fromStr + ", " + toStr);
-                return result;
-            }
+            script.append("  const fromDate = '" + escapeHtml(fromStr) + "';\n");
+            script.append("  const toDate = '" + escapeHtml(toStr) + "';\n");
         }
-        return result;
+
+        // Include the client-side time-ago calculation function
+        script.append(getClientSideTimeAgoScript());
+
+        // Call the function based on duration type
+        if (duration.equals("today")) {
+            script.append(
+                    "  const formattedValue = calculateTimeAgo(value, new Date().toISOString(), i18n, dateOutputFormat, inclDateOutputFormat);\n");
+        } else if (duration.equals("anotherDate")) {
+            script.append(
+                    "  const formattedValue = calculateTimeAgo(value, targetDate, i18n, dateOutputFormat, inclDateOutputFormat);\n");
+        } else if (duration.equals("twoDates")) {
+            script.append(
+                    "  const formattedValue = calculateTimeAgo(fromDate, toDate, i18n, dateOutputFormat, inclDateOutputFormat);\n");
+        }
+
+        script.append("  if (formattedValue) {\n");
+        script.append("    element.textContent = formattedValue;\n");
+        script.append("  }\n");
+        script.append("})();\n");
+        script.append("</script>");
+
+        return script.toString();
+    }
+
+    /**
+     * Escape HTML special characters to prevent XSS
+     */
+    private String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
+    /**
+     * Returns the JavaScript code for client-side time-ago calculation
+     */
+    private String getClientSideTimeAgoScript() {
+        StringBuilder script = new StringBuilder();
+
+        script.append("  function calculateTimeAgo(date1, date2, i18n, dateOutputFormat, inclDateOutputFormat) {\n");
+        script.append("    try {\n");
+        script.append("      // Parse dates\n");
+        script.append("      const parsedDate1 = parseMultiFormatDate(date1);\n");
+        script.append("      const parsedDate2 = parseMultiFormatDate(date2);\n");
+        script.append("      \n");
+        script.append("      if (!parsedDate1 || !parsedDate2) {\n");
+        script.append("        return null;\n");
+        script.append("      }\n");
+        script.append("      \n");
+        script.append("      // Calculate difference\n");
+        script.append("      const diff = calculateDateTimeDifference(parsedDate1, parsedDate2, i18n);\n");
+        script.append("      \n");
+        script.append("      // Format output if needed\n");
+        script.append("      if (dateOutputFormat && dateOutputFormat !== '') {\n");
+        script.append(
+                "        return formatDateTimeOutput(diff, dateOutputFormat, inclDateOutputFormat === 'true', i18n);\n");
+        script.append("      }\n");
+        script.append("      \n");
+        script.append("      return diff;\n");
+        script.append("    } catch (e) {\n");
+        script.append("      console.error('Time-ago calculation error:', e);\n");
+        script.append("      return null;\n");
+        script.append("    }\n");
+        script.append("  }\n");
+
+        // Add date parsing function
+        script.append("  function parseMultiFormatDate(dateString) {\n");
+        script.append("    if (!dateString) return null;\n");
+        script.append("    \n");
+        script.append("    // Try standard ISO format first\n");
+        script.append("    let date = new Date(dateString);\n");
+        script.append("    if (!isNaN(date.getTime())) {\n");
+        script.append("      return date;\n");
+        script.append("    }\n");
+        script.append("    \n");
+        script.append("    // Try common date formats\n");
+        script.append("    const formats = [\n");
+        script.append("      // Date only formats\n");
+        script.append(
+                "      { regex: /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/, fn: (m) => new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3])) },\n");
+        script.append(
+                "      { regex: /^(\\d{1,2})-(\\d{1,2})-(\\d{4})$/, fn: (m) => new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1])) },\n");
+        script.append("      \n");
+        script.append("      // Date time formats\n");
+        script.append(
+                "      { regex: /^(\\d{4})-(\\d{1,2})-(\\d{1,2})[ T](\\d{1,2}):(\\d{1,2})(?::(\\d{1,2}))?(?:\\s*([aApP][mM]))?$/, \n");
+        script.append("        fn: (m) => {\n");
+        script.append("          let hours = parseInt(m[4]);\n");
+        script.append("          const ampm = m[7] ? m[7].toLowerCase() : null;\n");
+        script.append("          if (ampm === 'pm' && hours < 12) hours += 12;\n");
+        script.append("          if (ampm === 'am' && hours === 12) hours = 0;\n");
+        script.append(
+                "          return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]), hours, parseInt(m[5]), m[6] ? parseInt(m[6]) : 0);\n");
+        script.append("        }\n");
+        script.append("      },\n");
+        script.append("      \n");
+        script.append("      // Time only formats (assuming today's date)\n");
+        script.append("      { regex: /^(\\d{1,2}):(\\d{1,2})(?:\\s*([aApP][mM]))?$/, \n");
+        script.append("        fn: (m) => {\n");
+        script.append("          let hours = parseInt(m[1]);\n");
+        script.append("          const ampm = m[3] ? m[3].toLowerCase() : null;\n");
+        script.append("          if (ampm === 'pm' && hours < 12) hours += 12;\n");
+        script.append("          if (ampm === 'am' && hours === 12) hours = 0;\n");
+        script.append("          const today = new Date();\n");
+        script.append(
+                "          return new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, parseInt(m[2]), 0);\n");
+        script.append("        }\n");
+        script.append("      }\n");
+        script.append("    ];\n");
+        script.append("    \n");
+        script.append("    // Try each format\n");
+        script.append("    for (const format of formats) {\n");
+        script.append("      const match = dateString.match(format.regex);\n");
+        script.append("      if (match) {\n");
+        script.append("        const parsedDate = format.fn(match);\n");
+        script.append("        if (!isNaN(parsedDate.getTime())) {\n");
+        script.append("          return parsedDate;\n");
+        script.append("        }\n");
+        script.append("      }\n");
+        script.append("    }\n");
+        script.append("    \n");
+        script.append("    return null;\n");
+        script.append("  }\n");
+
+        // Add date difference calculation function
+        script.append("  function calculateDateTimeDifference(date1, date2, i18n) {\n");
+        script.append("    // Ensure date2 is greater than date1\n");
+        script.append("    if (date1 > date2) {\n");
+        script.append("      [date1, date2] = [date2, date1];\n");
+        script.append("    }\n");
+        script.append("    \n");
+        script.append("    const diffMs = date2 - date1;\n");
+        script.append("    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));\n");
+        script.append(
+                "    const diffMonths = (date2.getFullYear() - date1.getFullYear()) * 12 + date2.getMonth() - date1.getMonth();\n");
+        script.append("    const diffYears = Math.floor(diffMonths / 12);\n");
+        script.append("    \n");
+        script.append("    // Calculate remaining months after years\n");
+        script.append("    const remainingMonths = diffMonths % 12;\n");
+        script.append("    \n");
+        script.append("    // Calculate remaining days after months\n");
+        script.append("    const date1Clone = new Date(date1);\n");
+        script.append("    date1Clone.setMonth(date1Clone.getMonth() + diffMonths);\n");
+        script.append("    let remainingDays = Math.floor((date2 - date1Clone) / (1000 * 60 * 60 * 24));\n");
+        script.append("    \n");
+        script.append("    // Calculate hours and minutes\n");
+        script.append("    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));\n");
+        script.append("    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));\n");
+        script.append("    \n");
+        script.append("    // Format the result\n");
+        script.append("    let result = '';\n");
+        script.append("    \n");
+        script.append("    if (diffYears > 0) {\n");
+        script.append(
+                "      result += diffYears + i18n.year + remainingMonths + i18n.month + remainingDays + i18n.day;\n");
+        script.append("    } else if (diffMonths > 0) {\n");
+        script.append("      result += diffMonths + i18n.month + remainingDays + i18n.day;\n");
+        script.append("    } else if (diffDays > 0) {\n");
+        script.append("      result += diffDays + i18n.day;\n");
+        script.append("    }\n");
+        script.append("    \n");
+        script.append("    // Add time difference if there are hours or minutes\n");
+        script.append("    if (diffHours > 0 || (diffDays === 0 && diffMinutes > 0)) {\n");
+        script.append("      if (diffHours > 0) {\n");
+        script.append("        result += (result ? ' ' : '') + diffHours + i18n.hour;\n");
+        script.append("      }\n");
+        script.append("      if (diffMinutes > 0) {\n");
+        script.append("        result += (result && diffHours > 0 ? ' ' : '') + diffMinutes + i18n.minute;\n");
+        script.append("      }\n");
+        script.append("    }\n");
+        script.append("    \n");
+        script.append("    return result;\n");
+        script.append("  }\n");
+
+        // Add output formatting function
+        script.append("  function formatDateTimeOutput(time, dateOutputFormat, inclDateOutputFormat, i18n) {\n");
+        script.append("    const parts = dateOutputFormat.split(';');\n");
+        script.append("    let finalOutput = '';\n");
+        script.append("    \n");
+        script.append("    for (const part of parts) {\n");
+        script.append("      let regex;\n");
+        script.append("      switch (part) {\n");
+        script.append("        case 'year':\n");
+        script.append("          regex = inclDateOutputFormat ? \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+\\\\s+' + i18n.year.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')') : \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+)\\\\s+' + i18n.year.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'));\n");
+        script.append("          break;\n");
+        script.append("        case 'month':\n");
+        script.append("          regex = inclDateOutputFormat ? \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+\\\\s+' + i18n.month.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')') : \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+)\\\\s+' + i18n.month.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'));\n");
+        script.append("          break;\n");
+        script.append("        case 'day':\n");
+        script.append("          regex = inclDateOutputFormat ? \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+\\\\s+' + i18n.day.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')') : \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+)\\\\s+' + i18n.day.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'));\n");
+        script.append("          break;\n");
+        script.append("        case 'hour':\n");
+        script.append("          regex = inclDateOutputFormat ? \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+\\\\s+' + i18n.hour.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')') : \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+)\\\\s+' + i18n.hour.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'));\n");
+        script.append("          break;\n");
+        script.append("        case 'minute':\n");
+        script.append("          regex = inclDateOutputFormat ? \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+\\\\s+' + i18n.minute.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + ')') : \n");
+        script.append(
+                "            new RegExp('\\\\b(\\\\d+)\\\\s+' + i18n.minute.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'));\n");
+        script.append("          break;\n");
+        script.append("        default:\n");
+        script.append("          continue;\n");
+        script.append("      }\n");
+        script.append("      \n");
+        script.append("      const match = time.match(regex);\n");
+        script.append("      if (match) {\n");
+        script.append("        finalOutput += match[1] + ' ';\n");
+        script.append("      }\n");
+        script.append("    }\n");
+        script.append("    \n");
+        script.append("    return finalOutput.trim();\n");
+        script.append("  }\n");
+
+        return script.toString();
     }
 }
